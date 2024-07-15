@@ -7,7 +7,7 @@ namespace Restaurante.Api.Models
 {
     public class Mesa
     {
-        int Id { get; set; }
-        int Capacidade { get; set; }
+        public int Id { get; set; }
+        public int Capacidade { get; set; }
     }
 }
