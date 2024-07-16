@@ -68,18 +68,25 @@ namespace Restaurante.Api.Controllers
                 QuantidadeDePessoas = reservaBase.QuantidadeDePessoas
             };
 
+            // TO-DO: colocar script para enviar mensagem pro usuario
+            string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} " + 
+            "Foi realizada com sucesso! Atente-se aos detalhes abaixo:\n\n" +
+            $"🕛 *Data e Hora:* {reserva.DataHoraReserva}\n" + 
+            $"🔢 *Número da mesa:* {reserva.IdMesa}";
+
+            try
+            {
+                EnviarNotificacaoSMS(reserva.TelefoneCliente, msg);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Ocorreu um erro inesperado. Sua reserva não poderá ser realizada.\n Detalhes do erro: " + ex);
+            }
+
             _context.Reservas.Add(reserva);
             _context.SaveChanges();
 
-            // TO-DO: colocar script para enviar mensagem pro usuario
-            string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva.Date.ToString("dd/MM/yyyy")} " + 
-            "Foi realizada com sucesso! Atente-se aos detalhes abaixo:\n\n" +
-            $"🕛 *Data e Hora:* {reserva.DataHoraReserva.Date}\n" + 
-            $"🔢 *Número da mesa:* {reserva.IdMesa}";
-
-            EnviarNotificacaoSMS(reserva.TelefoneCliente, msg);
-
-            return Ok("Sua reserva foi realizada com sucesso. Número da sua mesa:" + reserva.IdMesa);
+            return Ok("Sua reserva foi realizada com sucesso. Número da sua mesa: " + reserva.IdMesa);
         }
 
         private void EnviarNotificacaoSMS(string telefone, string mensagem)
