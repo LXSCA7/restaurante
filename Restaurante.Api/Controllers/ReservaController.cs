@@ -39,7 +39,7 @@ namespace Restaurante.Api.Controllers
 
             foreach (Mesa mesa in mesas)
             {
-                if (!_context.Reservas.Any(r => r.IdMesa == mesa.Id))
+                if (!_context.Reservas.Any(r => r.IdMesa == mesa.Id && r.DataHoraReserva == reservaBase.DataHoraReserva))
                 {
                     idMesaDisponivel = mesa.Id;
                     break;
