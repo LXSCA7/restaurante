@@ -98,10 +98,10 @@ namespace Restaurante.Api.Controllers
             var phoneNumber = Environment.GetEnvironmentVariable("TWILIO_PHONE_NUMBER");
             TwilioClient.Init(accountSid, authToken);
 
-            var messageOptions = new CreateMessageOptions(
-            new PhoneNumber($"whatsapp:{telefone}"));
-            messageOptions.From = new PhoneNumber(phoneNumber);
-            messageOptions.Body = mensagem;
+            var messageOptions = new CreateMessageOptions(new PhoneNumber($"whatsapp:{telefone}")) {
+                From = new PhoneNumber(phoneNumber),
+                Body = mensagem
+            };
 
 
             var message = MessageResource.Create(messageOptions);
