@@ -13,7 +13,6 @@ namespace Restaurante.Api.Context
         {
 
         }
-        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Mesa> Mesas { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
     }
