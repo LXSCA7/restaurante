@@ -20,29 +20,50 @@ namespace Restaurante.Api.Controllers
         }
 
         [HttpPut("criar-reserva")]
-        public IActionResult Create([FromBody] Reserva reserva)
+        public IActionResult Create([FromBody] ReservaBody reservaBase)
         {
-            if (!Email.VerifyMail(reserva.EmailCliente))
-                return BadRequest($"O email \"{reserva.EmailCliente}\" é inválido");
+            if (!Email.VerifyMail(reservaBase.EmailCliente))
+                return BadRequest($"O email \"{reservaBase.EmailCliente}\" é inválido");
             
-            if (!Phone.VerifyPhone(reserva.TelefoneCliente, out string telefoneFormatado))
-                return BadRequest($"O telefone \"{reserva.TelefoneCliente}\" é inválido.");
+            if (!Phone.VerifyPhone(reservaBase.TelefoneCliente, out string telefoneFormatado))
+                return BadRequest($"O telefone \"{reservaBase.TelefoneCliente}\" é inválido.");
 
-            reserva.TelefoneCliente = telefoneFormatado;
+            reservaBase.TelefoneCliente = telefoneFormatado;
 
-            var verificaMesa = _context.Mesas.FirstOrDefault(m => m.Id == reserva.IdMesa);
-
-            if (verificaMesa == null)
-                return BadRequest("Mesa inválida.");
+            // verifica se tem mesas disponiveis de forma automatica, passando o numero (id) da mesa pro usuario
+            List<Mesa> mesas = _context.Mesas.Where(c => c.Capacidade == reservaBase.QuantidadeDePessoas).ToList();
             
-            var mesaReservada = _context.Reservas.First(m => m.IdMesa == reserva.IdMesa && m.DataHoraReserva == reserva.DataHoraReserva);
-            
-            if (mesaReservada != null)
-                return BadRequest("A mesa já está reservada.");
+            int idMesaDisponivel = -1;
+            if (mesas == null)
+                return BadRequest("Não há mesas disponíveis.");
+
+            foreach (Mesa mesa in mesas)
+            {
+                if (!_context.Reservas.Any(r => r.IdMesa == mesa.Id))
+                {
+                    idMesaDisponivel = mesa.Id;
+                    break;
+                }
+            }
+
+            if (idMesaDisponivel == -1)
+                return BadRequest("Não temos mesas disponíveis.");
+
+            Reserva reserva = new() {
+                NomeCliente = reservaBase.NomeCliente,
+                EmailCliente = reservaBase.EmailCliente,
+                TelefoneCliente = reservaBase.TelefoneCliente,
+                IdMesa = idMesaDisponivel,
+                DataHoraReserva = reservaBase.DataHoraReserva,
+                QuantidadeDePessoas = reservaBase.QuantidadeDePessoas
+            };
 
             _context.Reservas.Add(reserva);
             _context.SaveChanges();
-            return Ok(reserva);
+
+            // TO-DO: colocar script para enviar mensagem pro usuario
+
+            return Ok("Sua reserva foi realizada com sucesso. Número da sua mesa:" + reserva.IdMesa);
         }
     }
 }
