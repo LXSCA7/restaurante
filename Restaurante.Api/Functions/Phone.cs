@@ -7,7 +7,7 @@ namespace Restaurante.Api.Functions
 {
     public class Phone
     {
-        public bool VerifyPhone(string phone, out string newPhone)
+        public static bool VerifyPhone(string phone, out string newPhone)
         {
             newPhone = "";
             if (phone.Any(c => char.IsLetter(c) == true))
@@ -17,12 +17,13 @@ namespace Restaurante.Api.Functions
             if (phone.Length != 14)
                 phone = model + phone;
             
-            if (phone[0] == '+' && phone[0] == '5' && phone[2] == '5' && phone.Length == 14)
+            if (phone.Length == 14 && phone.StartsWith("+55"))
             {
                 newPhone = phone;
                 return true;
             }
-            return true;
+
+            return false;
         }
     }
 }
