@@ -1,0 +1,3 @@
+api:
+	@echo Inicalizando a API...
+	@cd Restaurante.Api && dotnet watch run
