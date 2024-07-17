@@ -58,17 +58,22 @@ namespace Restaurante.Api.Controllers
                 QuantidadeDePessoas = reservaBase.QuantidadeDePessoas
             };
 
+            var reservaIdBase = _context.Reservas.OrderBy(r => r.Id).LastOrDefault();
+            int idDaReserva = reservaIdBase != null ? reservaIdBase.Id + 1 : 1;
+            // reservaIdBase = null;
+
             // TO-DO: colocar script para enviar mensagem pro usuario
             string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} " + 
             "Foi realizada com sucesso! Atente-se aos detalhes abaixo:\n\n" +
+            $"🔢 *Número da reserva:* {idDaReserva}\n" +
             $"🕛 *Data e Hora:* {reserva.DataHoraReserva}\n" + 
-            $"🔢 *Número da mesa:* {reserva.IdMesa}\n" +
+            $"🍽️ *Número da mesa:* {reserva.IdMesa}\n" +
             $"👥 *Quantidade de pessoas*: {reserva.QuantidadeDePessoas}\n\n" + 
             "_Chegue com antecedência e evite transtornos!_";
 
             try
             {
-                EnviarNotificacaoSMS(reserva.TelefoneCliente, msg);
+                SendWhatsapp(reserva.TelefoneCliente, msg);
             }
             catch (Exception ex)
             {
@@ -103,7 +108,7 @@ namespace Restaurante.Api.Controllers
             }
             return -1;
         }
-        private static void EnviarNotificacaoSMS(string telefone, string mensagem)
+        private static void SendWhatsapp(string telefone, string mensagem)
         {
             DotEnv.Load();
 
