@@ -58,24 +58,7 @@ namespace Restaurante.Api.Controllers
                 minuto = 30;
             }
 
-            // verifica se tem mesas disponiveis de forma automatica, passando o numero (id) da mesa pro usuario
-            List<Mesa> mesas = _context.Mesas.Where(c => c.Capacidade == reservaBase.QuantidadeDePessoas).ToList();
-            
-            int idMesaDisponivel = -1;
-            if (mesas == null)
-                return BadRequest("Não há mesas disponíveis.");
-
-            foreach (Mesa mesa in mesas)
-            {
-                /* TO-DO: fazer a verificação de duas horas de diferença para permitir a 
-                 * criação de uma nova reserva na mesma mesa em horários diferentes */
-
-                if (!_context.Reservas.Any(r => r.IdMesa == mesa.Id && r.DataHoraReserva == reservaBase.DataHoraReserva))
-                {
-                    idMesaDisponivel = mesa.Id;
-                    break;
-                }
-            }
+            int idMesaDisponivel = findMesa(reservaBase);
 
             if (idMesaDisponivel == -1)
                 return BadRequest("Não temos mesas disponíveis.");
@@ -112,6 +95,28 @@ namespace Restaurante.Api.Controllers
             return Ok("Sua reserva foi realizada com sucesso. Número da sua mesa: " + reserva.IdMesa);
         }
 
+        private int findMesa(ReservaBody reserva)
+        {
+            // verifica se tem mesas disponiveis de forma automatica, passando o numero (id) da mesa pro usuario
+            List<Mesa> mesas = _context.Mesas.Where(c => c.Capacidade == reserva.QuantidadeDePessoas).ToList();
+            
+            int idMesaDisponivel = -1;
+            if (mesas == null)
+                return -1;
+
+            foreach (Mesa mesa in mesas)
+            {
+                /* TO-DO: fazer a verificação de duas horas de diferença para permitir a 
+                 * criação de uma nova reserva na mesma mesa em horários diferentes */
+
+                if (!_context.Reservas.Any(r => r.IdMesa == mesa.Id && r.DataHoraReserva == reserva.DataHoraReserva))
+                {
+                    idMesaDisponivel = mesa.Id;
+                    return idMesaDisponivel;
+                }
+            }
+            return -1;
+        }
         private void EnviarNotificacaoSMS(string telefone, string mensagem)
         {
             DotEnv.Load();
