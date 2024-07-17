@@ -86,6 +86,15 @@ namespace Restaurante.Api.Controllers
             return Ok("Sua reserva foi realizada com sucesso. Número da sua mesa: " + reserva.IdMesa);
         }
 
+        [HttpGet("listar-reservas")]
+        public IActionResult ListAll()
+        {
+            List<Reserva> reservas = _context.Reservas.ToList();
+            return Ok(reservas);
+        }
+
+
+        // funcoes
         private int FindMesa(ReservaBody reserva)
         {
             // verifica se tem mesas disponiveis de forma automatica, passando o numero (id) da mesa pro usuario
