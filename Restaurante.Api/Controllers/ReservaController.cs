@@ -36,6 +36,27 @@ namespace Restaurante.Api.Controllers
                 return BadRequest($"O telefone \"{reservaBase.TelefoneCliente}\" é inválido.");
 
             reservaBase.TelefoneCliente = telefoneFormatado;
+            
+            // TO-DO: realizar formatação de data e hora:
+            /* exemplo:
+             * horario: 18:32
+             * novoHorario = 18:30
+             * horario = 12:15
+             * horario = 12:30            
+            */
+
+            var hora = reservaBase.DataHoraReserva.Hour;
+            var minuto = reservaBase.DataHoraReserva.Minute;
+
+            if (minuto < 15)
+            {
+                minuto = 00;
+            }
+
+            if (minuto >= 15)
+            {
+                minuto = 30;
+            }
 
             // verifica se tem mesas disponiveis de forma automatica, passando o numero (id) da mesa pro usuario
             List<Mesa> mesas = _context.Mesas.Where(c => c.Capacidade == reservaBase.QuantidadeDePessoas).ToList();
@@ -72,7 +93,9 @@ namespace Restaurante.Api.Controllers
             string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} " + 
             "Foi realizada com sucesso! Atente-se aos detalhes abaixo:\n\n" +
             $"🕛 *Data e Hora:* {reserva.DataHoraReserva}\n" + 
-            $"🔢 *Número da mesa:* {reserva.IdMesa}";
+            $"🔢 *Número da mesa:* {reserva.IdMesa}\n" +
+            $"👥 *Quantidade de pessoas*: {reserva.QuantidadeDePessoas}\n\n" + 
+            "_Chegue com antecedência e evite transtornos!_";
 
             try
             {
@@ -102,7 +125,6 @@ namespace Restaurante.Api.Controllers
                 From = new PhoneNumber(phoneNumber),
                 Body = mensagem
             };
-
 
             var message = MessageResource.Create(messageOptions);
             Console.WriteLine(message.Body);
