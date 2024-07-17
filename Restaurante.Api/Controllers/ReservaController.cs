@@ -36,29 +36,15 @@ namespace Restaurante.Api.Controllers
                 return BadRequest($"O telefone \"{reservaBase.TelefoneCliente}\" é inválido.");
 
             reservaBase.TelefoneCliente = telefoneFormatado;
-            
-            // TO-DO: realizar formatação de data e hora:
-            /* exemplo:
-             * horario: 18:32
-             * novoHorario = 18:30
-             * horario = 12:15
-             * horario = 12:30            
-            */
 
-            var hora = reservaBase.DataHoraReserva.Hour;
-            var minuto = reservaBase.DataHoraReserva.Minute;
+            // funcao de dois parametros para arrendondar o tempo para o mais proximo.
+            int hora = RoundTime(reservaBase.DataHoraReserva.Hour, reservaBase.DataHoraReserva.Minute, out int minuto);
 
-            if (minuto < 15)
-            {
-                minuto = 00;
-            }
+            var newDate = new DateTime(reservaBase.DataHoraReserva.Year, reservaBase.DataHoraReserva.Month, reservaBase.DataHoraReserva.Day, hora, minuto, 0);
 
-            if (minuto >= 15)
-            {
-                minuto = 30;
-            }
+            reservaBase.DataHoraReserva = newDate;
 
-            int idMesaDisponivel = findMesa(reservaBase);
+            int idMesaDisponivel = FindMesa(reservaBase);
 
             if (idMesaDisponivel == -1)
                 return BadRequest("Não temos mesas disponíveis.");
@@ -95,7 +81,7 @@ namespace Restaurante.Api.Controllers
             return Ok("Sua reserva foi realizada com sucesso. Número da sua mesa: " + reserva.IdMesa);
         }
 
-        private int findMesa(ReservaBody reserva)
+        private int FindMesa(ReservaBody reserva)
         {
             // verifica se tem mesas disponiveis de forma automatica, passando o numero (id) da mesa pro usuario
             List<Mesa> mesas = _context.Mesas.Where(c => c.Capacidade == reserva.QuantidadeDePessoas).ToList();
@@ -117,7 +103,7 @@ namespace Restaurante.Api.Controllers
             }
             return -1;
         }
-        private void EnviarNotificacaoSMS(string telefone, string mensagem)
+        private static void EnviarNotificacaoSMS(string telefone, string mensagem)
         {
             DotEnv.Load();
 
@@ -133,6 +119,26 @@ namespace Restaurante.Api.Controllers
 
             var message = MessageResource.Create(messageOptions);
             Console.WriteLine(message.Body);
+        }
+    
+        private static int RoundTime(int hora, int minuto, out int _minuto)
+        {
+            if (minuto < 15)
+            {
+                minuto = 0;
+            }
+            else if (minuto > 39)
+            {
+                hora += 1;
+                minuto = 0;
+            }
+            else
+            {
+                minuto = 30;
+            }
+
+            _minuto = minuto;
+            return hora;
         }
     }
 }
