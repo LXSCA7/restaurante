@@ -62,6 +62,9 @@ namespace Restaurante.Api.Controllers
             int idDaReserva = reservaIdBase != null ? reservaIdBase.Id + 1 : 1;
             // reservaIdBase = null;
 
+            _context.Reservas.Add(reserva);
+            _context.SaveChanges();
+
             // TO-DO: colocar script para enviar mensagem pro usuario
             string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} " + 
             "Foi realizada com sucesso! Atente-se aos detalhes abaixo:\n\n" +
@@ -80,9 +83,6 @@ namespace Restaurante.Api.Controllers
                 return BadRequest("Ocorreu um erro inesperado. Sua reserva não poderá ser realizada.\n Detalhes do erro: " + ex);
             }
 
-            _context.Reservas.Add(reserva);
-            _context.SaveChanges();
-
             return Ok("Sua reserva foi realizada com sucesso. Número da sua mesa: " + reserva.IdMesa);
         }
 
@@ -93,6 +93,26 @@ namespace Restaurante.Api.Controllers
             return Ok(reservas);
         }
 
+        [HttpDelete("cancelar-reserva/{id}")]
+        public IActionResult Delete(int id)
+        {
+            var reserva = _context.Reservas.Find(id);
+
+            if (reserva == null)
+                return BadRequest("Reserva não encontrada.");
+
+            // mensagem da reserva
+            string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} às " +
+            $"{reserva.DataHoraReserva:hh:mm} " + 
+            "foi cancelada conforme solicitado.";
+
+            SendWhatsapp(reserva.TelefoneCliente, msg);
+
+            _context.Reservas.Remove(reserva);
+            _context.SaveChanges();
+
+            return Ok($"A reserva de numero {reserva.Id} foi cancelada.");
+        }
 
         // funcoes
         private int FindMesa(ReservaBody reserva)
