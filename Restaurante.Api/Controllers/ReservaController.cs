@@ -58,17 +58,16 @@ namespace Restaurante.Api.Controllers
                 QuantidadeDePessoas = reservaBase.QuantidadeDePessoas
             };
 
-            var reservaIdBase = _context.Reservas.OrderBy(r => r.Id).LastOrDefault();
-            int idDaReserva = reservaIdBase != null ? reservaIdBase.Id + 1 : 1;
-            // reservaIdBase = null;
-
             _context.Reservas.Add(reserva);
             _context.SaveChanges();
+
+            var newReserva = _context.Reservas.FirstOrDefault(r => r.IdMesa == reserva.IdMesa && r.NomeCliente == 
+            reserva.NomeCliente && r.DataHoraReserva == reserva.DataHoraReserva);
 
             // TO-DO: colocar script para enviar mensagem pro usuario
             string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} " + 
             "Foi realizada com sucesso! Atente-se aos detalhes abaixo:\n\n" +
-            $"🔢 *Número da reserva:* {idDaReserva}\n" +
+            $"🔢 *Número da reserva:* {newReserva.Id}\n" +
             $"🕛 *Data e Hora:* {reserva.DataHoraReserva}\n" + 
             $"🍽️ *Número da mesa:* {reserva.IdMesa}\n" +
             $"👥 *Quantidade de pessoas*: {reserva.QuantidadeDePessoas}\n\n" + 
@@ -80,6 +79,8 @@ namespace Restaurante.Api.Controllers
             }
             catch (Exception ex)
             {
+                _context.Reservas.Remove(reserva);
+                _context.SaveChanges();
                 return BadRequest("Ocorreu um erro inesperado. Sua reserva não poderá ser realizada.\n Detalhes do erro: " + ex);
             }
 
