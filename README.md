@@ -2,7 +2,7 @@
 
 API criada para gerenciar reservas de mesas em um restaurante.
 
-Funcionalidades: _Verificar Disponibilidade*_, criar, _atualizar*_ e _cancelar*_ reservas.
+Funcionalidades: _Verificar Disponibilidade*_, criar, _atualizar*_ e cancelar reservas.
 
 _*atualizações futuras_
 
