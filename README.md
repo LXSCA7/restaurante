@@ -1,6 +1,6 @@
 # Sistema de Reservas de Restaurante
 
-API criada para gerenciar reservas de mesas em um restaurante.
+API criada para gerenciar reservas de mesas em um restaurante de forma automática, ao reservar, o usuário recebe o número da mesa e da reserva pelo Whatsapp através da API do twilio.
 
 Funcionalidades: _Verificar Disponibilidade*_, criar, _atualizar*_ e _cancelar*_ reservas.
 

@@ -39,10 +39,11 @@ namespace Restaurante.Api.Controllers
 
             // funcao de dois parametros para arrendondar o tempo para o mais proximo.
             int hora = RoundTime(reservaBase.DataHoraReserva.Hour, reservaBase.DataHoraReserva.Minute, out int minuto);
-
             var newDate = new DateTime(reservaBase.DataHoraReserva.Year, reservaBase.DataHoraReserva.Month, reservaBase.DataHoraReserva.Day, hora, minuto, 0);
-
             reservaBase.DataHoraReserva = newDate;
+
+            // if (!CheckDisponibility(newDate))
+            //     return BadRequest("Não há mesas disponíveis para seu horário.");
 
             int idMesaDisponivel = FindMesa(reservaBase);
 
@@ -121,19 +122,19 @@ namespace Restaurante.Api.Controllers
             // verifica se tem mesas disponiveis de forma automatica, passando o numero (id) da mesa pro usuario
             List<Mesa> mesas = _context.Mesas.Where(c => c.Capacidade == reserva.QuantidadeDePessoas).ToList();
             
-            int idMesaDisponivel = -1;
-            if (mesas == null)
+            if (mesas == null || mesas.Count == 0)
                 return -1;
 
             foreach (Mesa mesa in mesas)
             {
                 /* TO-DO: fazer a verificação de duas horas de diferença para permitir a 
-                 * criação de uma nova reserva na mesma mesa em horários diferentes */
+                * criação de uma nova reserva na mesma mesa em horários diferentes */
 
-                if (!_context.Reservas.Any(r => r.IdMesa == mesa.Id && r.DataHoraReserva == reserva.DataHoraReserva))
+                DateTime datePlus2 = reserva.DataHoraReserva.AddHours(2);
+
+                if (!_context.Reservas.Any(r => r.IdMesa == mesa.Id && r.DataHoraReserva >= reserva.DataHoraReserva && r.DataHoraReserva <= datePlus2))
                 {
-                    idMesaDisponivel = mesa.Id;
-                    return idMesaDisponivel;
+                    return mesa.Id;
                 }
             }
             return -1;
@@ -175,5 +176,6 @@ namespace Restaurante.Api.Controllers
             _minuto = minuto;
             return hora;
         }
+
     }
 }
