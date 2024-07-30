@@ -103,9 +103,13 @@ namespace Restaurante.Api.Controllers
             if (reserva == null)
                 return BadRequest("Reserva não encontrada.");
 
+            int hour = reserva.DataHoraReserva.Hour;
+            string min = reserva.DataHoraReserva.Minute.ToString();
+            string minute = min == "0" ? "00" : min;
+            
             // mensagem da reserva
-            string msg = $"👋 Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} às " +
-            $"{reserva.DataHoraReserva:hh:mm} " + 
+            string msg = $"Olá {reserva.NomeCliente}, sua reserva para o dia {reserva.DataHoraReserva:dd/MM/yyyy} às " +
+            $"{hour}:{minute} " + 
             "foi cancelada conforme solicitado.";
 
             SendWhatsapp(reserva.TelefoneCliente, msg);
