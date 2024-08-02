@@ -120,6 +120,23 @@ namespace Restaurante.Api.Controllers
             return Ok($"A reserva de numero {reserva.Id} foi cancelada.");
         }
 
+        [HttpGet("verificar-disponibilidade")]
+        public IActionResult VerifyDisponibility(DateTime date, int count)
+        {
+            ReservaBody reserva = new();
+
+            int hour = RoundTime(date.Hour, date.Minute, out int minute);
+            var newDate = new DateTime(date.Year, date.Month, date.Day, hour, minute, 00);
+            reserva.DataHoraReserva = date;
+            reserva.QuantidadeDePessoas = count;
+
+            if (FindMesa(reserva) == -1)
+                return BadRequest("Não temos mesas disponíveis para a data solicitada.");
+
+
+            return Ok("Temos mesas disponíveis para a data especificada!");
+        }
+
         // funcoes
         private int FindMesa(ReservaBody reserva)
         {
@@ -143,6 +160,7 @@ namespace Restaurante.Api.Controllers
             }
             return -1;
         }
+
         private static void SendWhatsapp(string telefone, string mensagem)
         {
             DotEnv.Load();
